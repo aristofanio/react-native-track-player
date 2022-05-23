@@ -1,3 +1,6 @@
+> FIXBUG =>  Android 12+ : Strongly consider using FLAG_IMMUTABLE, only 
+use FLAG_MUTABLE if some functionality depends on the PendingIntent being mutable
+
 <img src="https://react-native-track-player.js.org/img/optimized-logo.svg" width="300" />
 
 [![downloads](https://img.shields.io/npm/dw/react-native-track-player.svg)](https://www.npmjs.com/package/react-native-track-player)

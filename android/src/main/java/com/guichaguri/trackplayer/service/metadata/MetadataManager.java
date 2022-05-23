@@ -57,14 +57,18 @@ public class MetadataManager {
         this.service = service;
         this.manager = manager;
 
+        Context context = service.getApplicationContext();
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        PendingIntent pendingItent = PendingIntent.getBroadcast(
+            context, 0, mediaButtonIntent, PendingIntent.FLAG_IMMUTABLE
+        );
         String channel = Utils.getNotificationChannel((Context) service);
         this.builder = new NotificationCompat.Builder(service, channel);
-        this.session = new MediaSessionCompat(service, "TrackPlayer", null, null);
-
+        this.session = new MediaSessionCompat(service, "TrackPlayer", null, pendingItent);
         session.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
         session.setCallback(new ButtonEvents(service, manager));
 
-        Context context = service.getApplicationContext();
+        
         String packageName = context.getPackageName();
         Intent openApp = context.getPackageManager().getLaunchIntentForPackage(packageName);
 
@@ -81,8 +85,10 @@ public class MetadataManager {
         openApp.setAction(Intent.ACTION_VIEW);
         openApp.setData(Uri.parse("trackplayer://notification.click"));
 
-        builder.setContentIntent(PendingIntent.getActivity(context, 0, openApp, PendingIntent.FLAG_CANCEL_CURRENT));
-
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(
+            context, 0, openApp, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        builder.setContentIntent(contentPendingIntent);
         builder.setSmallIcon(R.drawable.play);
         builder.setCategory(NotificationCompat.CATEGORY_TRANSPORT);
 
@@ -263,8 +269,7 @@ public class MetadataManager {
             } else {
                 // Shows the cancel button on pre-lollipop versions due to a bug
                 style.setShowCancelButton(true);
-                style.setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(service,
-                        PlaybackStateCompat.ACTION_STOP));
+                style.setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(service, PlaybackStateCompat.ACTION_STOP));
             }
 
             // Links the media session
